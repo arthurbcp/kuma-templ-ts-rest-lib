@@ -1,0 +1,46 @@
+#  Global variables to be used in all the templates.
+Global:
+  ProjectName: "myproject"
+  ProjectRepository: "gihub.com/arthurbcp/ts-test-services"
+
+# structure of folders and files that will be generated
+Structure:
+  src:
+      providers:
+        http:
+          http_provider.ts:
+            Template: HttpProvider.gtpl
+            Data:
+              Servers: 
+                {{ range yaml .Servers }}{{ . }}
+                {{end}}
+
+      dto:
+        {{range .Components }}{{ if eq .Type "object" }}{{ toSnake .Name }}.ts:
+          Template: DTO.gtpl
+          Includes:
+            - TypeResolver.gtpl
+          Data:
+            {{ range yaml . }}{{ . }}
+            {{end}}
+        {{end}}{{end}}
+
+      services:
+        {{range .Controllers }}{{ toSnake .Name }}:
+          service.ts:
+            Template: Service.gtpl
+            Data:
+              Name: {{ .Name }}
+              FileName: {{ toSnake .Name }}_service.ts
+              Endpoints: 
+                {{ range yaml .Endpoints }}{{ . }}
+                {{ end }}
+              
+        {{end}}
+
+  index.ts:
+    Template: Index.gtpl
+  package.json:
+    Template: PackageJson.gtpl
+  tsconfig.json:
+    Template: TsConfig.gtpl

@@ -1,0 +1,414 @@
+{
+  "Global": {
+    "ProjectName": "myproject",
+    "ProjectRepository": "gihub.com/arthurbcp/ts-test-services"
+  },
+  "Structure": {
+    "src": {
+      "providers": {
+        "http": {
+          "http_provider.ts": {
+            "Template": "HttpProvider.gtpl"
+          },
+          "http_provider_interface.ts": {
+            "Template": "HttpProviderInterface.gtpl"
+          }
+        }
+      },
+      "dto": {
+        "error.ts": {
+          "Template": "DTO.gtpl",
+          "Includes": ["TypeResolver.gtpl"],
+          "Data": {
+            "Name": "Error",
+            "Properties": [
+              {
+                "Name": "message",
+                "Type": "string"
+              },
+              {
+                "Format": "uri",
+                "Name": "documentation_url",
+                "Type": "string"
+              }
+            ],
+            "Type": "object"
+          }
+        },
+        "repository.ts": {
+          "Template": "DTO.gtpl",
+          "Includes": ["TypeResolver.gtpl"],
+          "Data": {
+            "Name": "Repository",
+            "Properties": [
+              {
+                "Name": "fork",
+                "Type": "boolean"
+              },
+              {
+                "Format": "uri",
+                "Name": "url",
+                "Type": "string"
+              },
+              {
+                "Format": "date-time",
+                "Name": "created_at",
+                "Type": "string"
+              },
+              {
+                "Name": "id",
+                "Type": "integer"
+              },
+              {
+                "Name": "name",
+                "Type": "string"
+              },
+              {
+                "Format": "uri",
+                "Name": "html_url",
+                "Type": "string"
+              },
+              {
+                "Name": "description",
+                "Type": "string"
+              },
+              {
+                "Format": "date-time",
+                "Name": "updated_at",
+                "Type": "string"
+              },
+              {
+                "Format": "date-time",
+                "Name": "pushed_at",
+                "Type": "string"
+              },
+              {
+                "Name": "full_name",
+                "Type": "string"
+              },
+              {
+                "Name": "private",
+                "Type": "boolean"
+              },
+              {
+                "Name": "owner",
+                "Ref": "User"
+              }
+            ],
+            "Type": "object"
+          }
+        },
+        "new_repository.ts": {
+          "Template": "DTO.gtpl",
+          "Includes": ["TypeResolver.gtpl"],
+          "Data": {
+            "Name": "NewRepository",
+            "Properties": [
+              {
+                "Description": "Repository description",
+                "Name": "description",
+                "Type": "string"
+              },
+              {
+                "Description": "Specifies if the repository will be private",
+                "Name": "private",
+                "Type": "boolean"
+              },
+              {
+                "Description": "Name of the new repository",
+                "Name": "name",
+                "Required": true,
+                "Type": "string"
+              }
+            ],
+            "Type": "object"
+          }
+        },
+        "update_repository.ts": {
+          "Template": "DTO.gtpl",
+          "Includes": ["TypeResolver.gtpl"],
+          "Data": {
+            "Name": "UpdateRepository",
+            "Properties": [
+              {
+                "Description": "New repository name",
+                "Name": "name",
+                "Type": "string"
+              },
+              {
+                "Description": "New repository description",
+                "Name": "description",
+                "Type": "string"
+              },
+              {
+                "Description": "Specifies if the repository will be private",
+                "Name": "private",
+                "Type": "boolean"
+              }
+            ],
+            "Type": "object"
+          }
+        },
+        "user.ts": {
+          "Template": "DTO.gtpl",
+          "Includes": ["TypeResolver.gtpl"],
+          "Data": {
+            "Name": "User",
+            "Properties": [
+              {
+                "Name": "login",
+                "Type": "string"
+              },
+              {
+                "Name": "id",
+                "Type": "integer"
+              },
+              {
+                "Format": "uri",
+                "Name": "avatar_url",
+                "Type": "string"
+              },
+              {
+                "Format": "uri",
+                "Name": "html_url",
+                "Type": "string"
+              }
+            ],
+            "Type": "object"
+          }
+        }
+      },
+      "services": {
+        "repositories": {
+          "service.ts": {
+            "Template": "Service.gtpl",
+            "Data": {
+              "Name": "Repositories",
+              "FileName": "repositories_service.ts",
+              "Endpoints": [
+                {
+                  "HttpMethod": "PATCH",
+                  "PathParams": [
+                    {
+                      "Description": "Username or organization name of the repository owner",
+                      "Name": "owner",
+                      "Required": true
+                    },
+                    {
+                      "Description": "Repository name",
+                      "Name": "repo",
+                      "Required": true
+                    }
+                  ],
+                  "RequestBody": {
+                    "Content": {
+                      "MediaTypes": [
+                        {
+                          "Ref": "UpdateRepository",
+                          "Type": "application/json"
+                        }
+                      ]
+                    },
+                    "Required": true
+                  },
+                  "Responses": [
+                    {
+                      "Content": {
+                        "MediaTypes": [
+                          {
+                            "Ref": "Repository",
+                            "Type": "application/json"
+                          }
+                        ]
+                      },
+                      "Description": "Repository updated successfully",
+                      "StatusCode": 200
+                    },
+                    {
+                      "Content": {
+                        "MediaTypes": [
+                          {
+                            "Ref": "Error",
+                            "Type": "application/json"
+                          }
+                        ]
+                      },
+                      "Description": "Repository not found",
+                      "StatusCode": 404
+                    }
+                  ],
+                  "Route": "/repos/{owner}/{repo}",
+                  "Summary": "Update an existing repository"
+                },
+                {
+                  "HttpMethod": "DELETE",
+                  "PathParams": [
+                    {
+                      "Description": "Username or organization name of the repository owner",
+                      "Name": "owner",
+                      "Required": true
+                    },
+                    {
+                      "Description": "Repository name",
+                      "Name": "repo",
+                      "Required": true
+                    }
+                  ],
+                  "Responses": [
+                    {
+                      "Description": "Repository deleted successfully",
+                      "StatusCode": 204
+                    },
+                    {
+                      "Content": {
+                        "MediaTypes": [
+                          {
+                            "Ref": "Error",
+                            "Type": "application/json"
+                          }
+                        ]
+                      },
+                      "Description": "Repository not found",
+                      "StatusCode": 404
+                    }
+                  ],
+                  "Route": "/repos/{owner}/{repo}",
+                  "Summary": "Delete a repository"
+                },
+                {
+                  "HttpMethod": "GET",
+                  "PathParams": [
+                    {
+                      "Description": "Username or organization name of the repository owner",
+                      "Name": "owner",
+                      "Required": true
+                    },
+                    {
+                      "Description": "Repository name",
+                      "Name": "repo",
+                      "Required": true
+                    }
+                  ],
+                  "Responses": [
+                    {
+                      "Content": {
+                        "MediaTypes": [
+                          {
+                            "Ref": "Repository",
+                            "Type": "application/json"
+                          }
+                        ]
+                      },
+                      "Description": "Repository details",
+                      "StatusCode": 200
+                    },
+                    {
+                      "Content": {
+                        "MediaTypes": [
+                          {
+                            "Ref": "Error",
+                            "Type": "application/json"
+                          }
+                        ]
+                      },
+                      "Description": "Repository not found",
+                      "StatusCode": 404
+                    }
+                  ],
+                  "Route": "/repos/{owner}/{repo}",
+                  "Summary": "Get details of a specific repository"
+                },
+                {
+                  "HttpMethod": "GET",
+                  "QueryParams": [
+                    {
+                      "Description": "Filter repositories by visibility",
+                      "Name": "visibility"
+                    },
+                    {
+                      "Description": "Filter repositories by affiliation",
+                      "Name": "affiliation"
+                    }
+                  ],
+                  "Responses": [
+                    {
+                      "Content": {
+                        "MediaTypes": [
+                          {
+                            "Type": "application/json"
+                          }
+                        ]
+                      },
+                      "Description": "List of repositories",
+                      "StatusCode": 200
+                    }
+                  ],
+                  "Route": "/user/repos",
+                  "Summary": "List repositories of the authenticated user"
+                },
+                {
+                  "HttpMethod": "POST",
+                  "RequestBody": {
+                    "Content": {
+                      "MediaTypes": [
+                        {
+                          "Ref": "NewRepository",
+                          "Type": "application/json"
+                        }
+                      ]
+                    },
+                    "Required": true
+                  },
+                  "Responses": [
+                    {
+                      "Content": {
+                        "MediaTypes": [
+                          {
+                            "Ref": "Repository",
+                            "Type": "application/json"
+                          }
+                        ]
+                      },
+                      "Description": "Repository created successfully",
+                      "StatusCode": 201
+                    },
+                    {
+                      "Content": {
+                        "MediaTypes": [
+                          {
+                            "Ref": "Error",
+                            "Type": "application/json"
+                          }
+                        ]
+                      },
+                      "Description": "Validation error",
+                      "StatusCode": 422
+                    }
+                  ],
+                  "Route": "/user/repos",
+                  "Summary": "Create a new repository"
+                }
+              ]
+            }
+          },
+          "service_interface.ts": {
+            "Template": "ServiceInterface.gtpl",
+            "Data": {
+              "Name": "Repositories",
+              "FileName": "repositories_service_interface.ts"
+            }
+          }
+        }
+      }
+    },
+    "index.ts": {
+      "Template": "Index.gtpl"
+    },
+    "package.json": {
+      "Template": "PackageJson.gtpl"
+    },
+    "tsconfig.json": {
+      "Template": "TsConfig.gtpl"
+    }
+  }
+}

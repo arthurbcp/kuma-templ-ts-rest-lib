@@ -1,0 +1,386 @@
+{
+  "Version": "3.0.0",
+  "InfoTitle": "GitHub Repositories API",
+  "InfoDescription": "API for managing repositories on GitHub",
+  "InfoVersion": "1.0.0",
+  "Servers": [
+    {
+      "Url": "https://api.github.com",
+      "Description": "Public GitHub API"
+    }
+  ],
+  "Controllers": [
+    {
+      "Name": "Repositories",
+      "Endpoints": [
+        {
+          "Name": "getRepositories",
+          "Summary": "List repositories of the authenticated user",
+          "Route": "/user/repos",
+          "HttpMethod": "GET",
+          "QueryParams": [
+            {
+              "Name": "visibility",
+              "Description": "Filter repositories by visibility"
+            },
+            {
+              "Name": "affiliation",
+              "Description": "Filter repositories by affiliation"
+            }
+          ],
+          "Responses": [
+            {
+              "Description": "List of repositories",
+              "StatusCode": 200,
+              "Content": {
+                "MediaTypes": [
+                  {
+                    "Type": "application/json"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "Name": "CreateRepository",
+          "Summary": "Create a new repository",
+          "Route": "/user/repos",
+          "HttpMethod": "POST",
+          "RequestBody": {
+            "Required": true,
+            "Content": {
+              "MediaTypes": [
+                {
+                  "Type": "application/json",
+                  "Ref": "NewRepository"
+                }
+              ]
+            }
+          },
+          "Responses": [
+            {
+              "Description": "Repository created successfully",
+              "StatusCode": 201,
+              "Content": {
+                "MediaTypes": [
+                  {
+                    "Type": "application/json",
+                    "Ref": "Repository"
+                  }
+                ]
+              }
+            },
+            {
+              "Description": "Validation error",
+              "StatusCode": 422,
+              "Content": {
+                "MediaTypes": [
+                  {
+                    "Type": "application/json",
+                    "Ref": "Error"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "Name": "getRepositoryById",
+          "Summary": "Get details of a specific repository",
+          "Route": "/repos/{owner}/{repo}",
+          "HttpMethod": "GET",
+          "PathParams": [
+            {
+              "Name": "owner",
+              "Description": "Username or organization name of the repository owner",
+              "Required": true
+            },
+            {
+              "Name": "repo",
+              "Description": "Repository name",
+              "Required": true
+            }
+          ],
+          "Responses": [
+            {
+              "Description": "Repository details",
+              "StatusCode": 200,
+              "Content": {
+                "MediaTypes": [
+                  {
+                    "Type": "application/json",
+                    "Ref": "Repository"
+                  }
+                ]
+              }
+            },
+            {
+              "Description": "Repository not found",
+              "StatusCode": 404,
+              "Content": {
+                "MediaTypes": [
+                  {
+                    "Type": "application/json",
+                    "Ref": "Error"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "Name": "updateRepositoryById",
+          "Summary": "Update an existing repository",
+          "Route": "/repos/{owner}/{repo}",
+          "HttpMethod": "PATCH",
+          "PathParams": [
+            {
+              "Name": "owner",
+              "Description": "Username or organization name of the repository owner",
+              "Required": true
+            },
+            {
+              "Name": "repo",
+              "Description": "Repository name",
+              "Required": true
+            }
+          ],
+          "RequestBody": {
+            "Required": true,
+            "Content": {
+              "MediaTypes": [
+                {
+                  "Type": "application/json",
+                  "Ref": "UpdateRepository"
+                }
+              ]
+            }
+          },
+          "Responses": [
+            {
+              "Description": "Repository not found",
+              "StatusCode": 404,
+              "Content": {
+                "MediaTypes": [
+                  {
+                    "Type": "application/json",
+                    "Ref": "Error"
+                  }
+                ]
+              }
+            },
+            {
+              "Description": "Repository updated successfully",
+              "StatusCode": 200,
+              "Content": {
+                "MediaTypes": [
+                  {
+                    "Type": "application/json",
+                    "Ref": "Repository"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "Name": "deleteRepositoryById",
+          "Summary": "Delete a repository",
+          "Route": "/repos/{owner}/{repo}",
+          "HttpMethod": "DELETE",
+          "PathParams": [
+            {
+              "Name": "owner",
+              "Description": "Username or organization name of the repository owner",
+              "Required": true
+            },
+            {
+              "Name": "repo",
+              "Description": "Repository name",
+              "Required": true
+            }
+          ],
+          "Responses": [
+            {
+              "Description": "Repository deleted successfully",
+              "StatusCode": 204
+            },
+            {
+              "Description": "Repository not found",
+              "StatusCode": 404,
+              "Content": {
+                "MediaTypes": [
+                  {
+                    "Type": "application/json",
+                    "Ref": "Error"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "Components": [
+    {
+      "Name": "User",
+      "Type": "object",
+      "Properties": [
+        {
+          "Name": "login",
+          "Type": "string",
+          "Required": true
+        },
+        {
+          "Name": "id",
+          "Type": "integer",
+          "Required": true
+        },
+        {
+          "Name": "avatar_url",
+          "Type": "string",
+          "Format": "uri"
+        },
+        {
+          "Name": "html_url",
+          "Type": "string",
+          "Format": "uri"
+        },
+        {
+          "Name": "users",
+          "Type": "array",
+          "Items": {
+            "Ref": "User"
+          }
+        },
+        {
+          "Name": "repositories",
+          "Type": "array",
+          "Items": {
+            "Ref": "Repository"
+          }
+        }
+      ]
+    },
+    {
+      "Name": "Error",
+      "Type": "object",
+      "Properties": [
+        {
+          "Name": "message",
+          "Type": "string",
+          "Enum": ["not_found", "internal"]
+        },
+        {
+          "Name": "documentation_url",
+          "Type": "string",
+          "Format": "uri"
+        }
+      ]
+    },
+    {
+      "Name": "Repository",
+      "Type": "object",
+      "Properties": [
+        {
+          "Name": "description",
+          "Type": "string"
+        },
+        {
+          "Name": "fork",
+          "Type": "boolean"
+        },
+        {
+          "Name": "url",
+          "Type": "string",
+          "Format": "uri"
+        },
+        {
+          "Name": "updated_at",
+          "Type": "string",
+          "Format": "date-time"
+        },
+        {
+          "Name": "pushed_at",
+          "Type": "string",
+          "Format": "date-time"
+        },
+        {
+          "Name": "name",
+          "Type": "string"
+        },
+        {
+          "Name": "full_name",
+          "Type": "string"
+        },
+        {
+          "Name": "private",
+          "Type": "boolean"
+        },
+        {
+          "Name": "owner",
+          "Ref": "User"
+        },
+        {
+          "Name": "html_url",
+          "Type": "string",
+          "Format": "uri"
+        },
+        {
+          "Name": "created_at",
+          "Type": "string",
+          "Format": "date-time"
+        },
+        {
+          "Name": "id",
+          "Type": "integer"
+        }
+      ]
+    },
+    {
+      "Name": "NewRepository",
+      "Type": "object",
+      "Properties": [
+        {
+          "Name": "name",
+          "Type": "string",
+          "Description": "Name of the new repository",
+          "Required": true
+        },
+        {
+          "Name": "description",
+          "Type": "string",
+          "Description": "Repository description"
+        },
+        {
+          "Name": "private",
+          "Type": "boolean",
+          "Description": "Specifies if the repository will be private"
+        }
+      ]
+    },
+    {
+      "Name": "UpdateRepository",
+      "Type": "object",
+      "Properties": [
+        {
+          "Name": "name",
+          "Type": "string",
+          "Description": "New repository name"
+        },
+        {
+          "Name": "description",
+          "Type": "string",
+          "Description": "New repository description"
+        },
+        {
+          "Name": "private",
+          "Type": "boolean",
+          "Description": "Specifies if the repository will be private"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,272 @@
+---
+openapi: 3.0.0
+info:
+  title: GitHub Repositories API
+  description: API for managing repositories on GitHub
+  version: 1.0.0
+servers:
+  - url: https://api.github.com
+    description: Public GitHub API
+paths:
+  "/user/repos":
+    get:
+      summary: List repositories of the authenticated user
+      operationId: getRepositories
+      tags:
+        - Repositories
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: visibility
+          schema:
+            type: string
+            enum:
+              - all
+              - public
+              - private
+          description: Filter repositories by visibility
+        - in: query
+          name: affiliation
+          schema:
+            type: string
+            enum:
+              - owner
+              - collaborator
+              - organization_member
+          description: Filter repositories by affiliation
+      responses:
+        "200":
+          description: List of repositories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/Repository"
+    post:
+      summary: Create a new repository
+      operationId: CreateRepository
+      tags:
+        - Repositories
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/NewRepository"
+      responses:
+        "201":
+          description: Repository created successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Repository"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Error"
+  "/repos/{owner}/{repo}":
+    get:
+      summary: Get details of a specific repository
+      operationId: getRepositoryById
+      tags:
+        - Repositories
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: owner
+          required: true
+          schema:
+            type: string
+          description: Username or organization name of the repository owner
+        - in: path
+          name: repo
+          required: true
+          schema:
+            type: string
+          description: Repository name
+      responses:
+        "200":
+          description: Repository details
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Repository"
+        "404":
+          description: Repository not found
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Error"
+    patch:
+      summary: Update an existing repository
+      operationId: updateRepositoryById
+      tags:
+        - Repositories
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: owner
+          required: true
+          schema:
+            type: string
+          description: Username or organization name of the repository owner
+        - in: path
+          name: repo
+          required: true
+          schema:
+            type: string
+          description: Repository name
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/UpdateRepository"
+      responses:
+        "200":
+          description: Repository updated successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Repository"
+        "404":
+          description: Repository not found
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Error"
+    delete:
+      operationId: deleteRepositoryById
+      summary: Delete a repository
+      tags:
+        - Repositories
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: owner
+          required: true
+          schema:
+            type: string
+          description: Username or organization name of the repository owner
+        - in: path
+          name: repo
+          required: true
+          schema:
+            type: string
+          description: Repository name
+      responses:
+        "204":
+          description: Repository deleted successfully
+        "404":
+          description: Repository not found
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Error"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Repository:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        full_name:
+          type: string
+        private:
+          type: boolean
+        owner:
+          "$ref": "#/components/schemas/User"
+        html_url:
+          type: string
+          format: uri
+        description:
+          type: string
+        fork:
+          type: boolean
+        url:
+          type: string
+          format: uri
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        pushed_at:
+          type: string
+          format: date-time
+    NewRepository:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: Name of the new repository
+        description:
+          type: string
+          description: Repository description
+        private:
+          type: boolean
+          description: Specifies if the repository will be private
+    UpdateRepository:
+      type: object
+      properties:
+        name:
+          type: string
+          description: New repository name
+        description:
+          type: string
+          description: New repository description
+        private:
+          type: boolean
+          description: Specifies if the repository will be private
+    User:
+      type: object
+      required: ["id", "login"]
+      properties:
+        login:
+          type: string
+        id:
+          type: integer
+        avatar_url:
+          type: string
+          format: uri
+        html_url:
+          type: string
+          format: uri
+        users:
+          type: array
+          items:
+            "$ref": "#/components/schemas/User"
+        repositories:
+          type: array
+          items:
+            "$ref": "#/components/schemas/Repository"
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          enum:
+            - "not_found"
+            - "internal"
+        documentation_url:
+          type: string
+          format: uri
